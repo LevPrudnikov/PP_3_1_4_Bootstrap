@@ -3,6 +3,7 @@ package ru.kata.spring.boot_security.demo.controllers;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
@@ -18,14 +19,16 @@ public class UserController {
     }
 
     @GetMapping("/")
-    public String indexPage() {
-        return "index";
+    public ModelAndView indexPage() {
+        ModelAndView modelAndView = new ModelAndView("index");
+        return modelAndView;
     }
 
     @GetMapping("/user")
-    public String userPage(Principal principal, Model model) {
+    public ModelAndView userPage(Principal principal) {
+        ModelAndView modelAndView = new ModelAndView("user");
         User user = userService.findByUsername(principal.getName());
-        model.addAttribute("user", user);
-        return "user";
+        modelAndView.addObject("user", user);
+        return modelAndView;
     }
 }

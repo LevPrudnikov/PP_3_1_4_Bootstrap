@@ -2,7 +2,6 @@ package ru.kata.spring.boot_security.demo.controllers;
 
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
@@ -30,41 +30,47 @@ public class AdminController {
     }
 
     @GetMapping
-    public String displayAllUser(Principal principal, Model model){
+    public ModelAndView displayAllUser(Principal principal){
+        ModelAndView modelAndView = new ModelAndView("admin/index");
         User user = userService.findByUsername(principal.getName());
-        model.addAttribute("user", user);
-        model.addAttribute("users",userService.getUsers());
-        model.addAttribute("roles", roleService.getRoles());
-        return "admin/index";
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("users",userService.getUsers());
+        modelAndView.addObject("roles", roleService.getRoles());
+        return modelAndView;
     }
 
     @PostMapping("/new")
-    public String create(@ModelAttribute("user") @Valid User user,
+    public ModelAndView create(@ModelAttribute("user") @Valid User user,
                          @RequestParam("role_id") Long role_id,
                          BindingResult bindingResult){
+        ModelAndView modelAndView = new ModelAndView("admin/index");
+        ModelAndView modelAndViewRedirect = new ModelAndView("redirect:/admin");
         if (bindingResult.hasErrors()){
-            return "admin/new";
+            return modelAndView;
         }
         user.setRole(roleService.getRole(role_id));
         userService.addUser(user);
-        return "redirect:/admin";
+        return modelAndViewRedirect;
     }
 
     @PatchMapping("/edit")
-    public String update(@ModelAttribute("user") @Valid User user,
+    public ModelAndView update(@ModelAttribute("user") @Valid User user,
                          @RequestParam("role_id") Long role_id,
                          BindingResult bindingResult){
+        ModelAndView modelAndView = new ModelAndView("admin/index");
+        ModelAndView modelAndViewRedirect = new ModelAndView("redirect:/admin");
         if (bindingResult.hasErrors()){
-            return "admin/edit";
+            return modelAndView;
         }
         user.setRole(roleService.getRole(role_id));
         userService.updateUser(user);
-        return "redirect:/admin";
+        return modelAndViewRedirect;
     }
 
     @DeleteMapping("/delete")
-    public String delete (@RequestParam("id") Long id){
+    public ModelAndView delete (@RequestParam("id") Long id){
+        ModelAndView modelAndViewRedirect = new ModelAndView("redirect:/admin");
         userService.deleteUser(id);
-        return "redirect:/admin";
+        return modelAndViewRedirect;
     }
 }
